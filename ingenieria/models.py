@@ -1,13 +1,31 @@
 from django.db import models
 from django.urls import reverse
 from organizaciones.models import Fabricante, Diseñador, Aprovador, Certificador
-from mantenimiento.models import PlanMantenimiento
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Modelos que representan la descripción técnica de todos los elementos del material rodante
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# 1. VEHÍCULOS, sus sistemas, conjuntos y elementos
+# 0. PLANES DE MANTENIMIENTO DE VEHÍCULOS Y EJES
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+class PlanMantenimiento(models.Model):
+    codigo = models.CharField(max_length=16, unique= True)
+    descripcion = models.CharField(max_length=300, null=True, blank=True)
+    num_niveles = models.IntegerField(default=3, null=True, blank=True)
+    slug_pm = models.CharField(max_length=30, default = '', null=True, blank=True)
+    def __str__(self):
+        return self.codigo
+
+class NivelesPlan(models.Model):
+    pm = models.ForeignKey(PlanMantenimiento, on_delete=models.CASCADE, null=True, blank=True)
+    num_nivel = models.IntegerField(default=0, null=True, blank=True)
+    cod_nivel = models.CharField(max_length=4, default = '', null=True, blank=True)
+    dias_siguiente = models.IntegerField(default=365)
+    km_siguiente = models.IntegerField(default=100000)
+    def __str__(self):
+        return (str(self.pm.codigo) + '-' + str(self.cod_nivel))
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# 1. TIPOS DE VEHÍCULOS
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 class TipoVehiculo(models.Model):
     opciones_clase =    [   ('LOC', 'Locomotora de línea'),
@@ -15,37 +33,95 @@ class TipoVehiculo(models.Model):
                             ('MRA', 'Material Rodante Auxiliar'),
                         ]
     clase= models.CharField(max_length=16, choices = opciones_clase, default = 'MRA')
-    descripcion = models.CharField(max_length=50, unique= True)
-    marca = models.CharField(max_length=50, unique= True)
-    modelo = models.CharField(max_length=50, unique= True)
-    tipo_uic = models.CharField(max_length=4)
-    serie_uic = models.CharField(max_length=4)
+    descripcion = models.CharField(max_length=50, null=True, blank=True)
+    marca = models.CharField(max_length=50, null=True, blank=True)
+    modelo = models.CharField(max_length=50, null=True, blank=True)
+    tipo_uic = models.CharField(max_length=4, null=True, blank=True)
+    serie_uic = models.CharField(max_length=4, null=True, blank=True)
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     num_bogies = models.IntegerField(default=0, null=True, blank=True)
+    carga_maxima = models.FloatField(null=True, blank=True)
+    tara = models.FloatField(null=True, blank=True)
+    peso_x_eje = models.FloatField(null=True, blank=True)
+    velocidad = models.FloatField(null=True, blank=True)
+    longitud = models.FloatField(null=True, blank=True)
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     imagen = models.CharField(max_length=30,default = ' ', null=True, blank=True)
-    slug_doc_tec = models.CharField(max_length=30, default = ' ', null=True, blank=True)
-    #pm = models.ForeignKey(PlanMantenimiento, on_delete=models.RESTRICT, null=True, blank=True)
+    pm = models.ForeignKey(PlanMantenimiento, on_delete=models.RESTRICT, null=True, blank=True)
+    slug_ft = models.CharField(max_length=30, default = ' ', null=True, blank=True)
+    slug_iu = models.CharField(max_length=30, default = '', null=True, blank=True)
     def __str__(self):
-        return self.codigo
+        return (str(self.clase) + '-' + str(self.tipo_uic) + '-' + str(self.serie_uic))
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# 1.1 Sistemas en los vehículos (todo menos ejes y distribuidores)
+# 2. TIPOS DE EAVM - Ejes Ancho Variable de Mercancias
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-class Sistema(models.Model):
-    codigo= models.CharField(max_length=16, unique= True, null=True, blank=True)
-    descripcion = models.CharField(max_length=50, null=True, blank=True)
-    slug_doc = models.CharField(max_length=30, default = ' ', null=True, blank=True)
+class TipoEAVM(models.Model):
+    codigo= models.CharField(max_length=16, unique= True)
+    opciones_anchos =  [('UIC-IB', 'UIC(1435) <> IBÉRICO (1668)'),
+                        ('UIC-RUS', 'UIC(1435) <> RUSO (1520)'),
+                        ('UIC-RUS-IB', 'UIC <> RUSO <> IBÉRICO'),
+                        ('METR-UIC', 'MÉTRICO(1000) <> UIC(1435)'),
+                        ('UIC', 'UIC (1435)'),
+                        ('IB', 'IB (1668)')]
+    anchos = models.CharField(max_length=12, choices = opciones_anchos, default = 'UIC-IB')
+    diseñador = models.ForeignKey(Diseñador, on_delete=models.RESTRICT, limit_choices_to={'de_ejes': True},)
+    aprovador = models.ForeignKey(Aprovador, on_delete=models.RESTRICT, null=True, blank=True)
+    fecha_aprovacion = models.DateField(null=True, blank=True)
+    certificador = models.ForeignKey(Certificador, on_delete=models.RESTRICT, null=True, blank=True)
+    fecha_certificacion = models.DateField(null=True, blank=True)
+    imagen = models.CharField(max_length=30,default = '', null=True, blank=True)
+    pm = models.ForeignKey(PlanMantenimiento, on_delete=models.RESTRICT, null=True, blank=True)
+    slug_ft = models.CharField(max_length=30, default = '', null=True, blank=True)
+    slug_iu = models.CharField(max_length=30, default = '', null=True, blank=True)
     def __str__(self):
         return self.codigo
 
-class Componente(models.Model):
-    sistema = models.ForeignKey(Sistema, on_delete=models.CASCADE, null=True, blank=True)
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# 3. Sistemas conjuntos y componentes en los vehículos o en los EAVM
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+class TipoSistema(models.Model):
     codigo= models.CharField(max_length=16, unique= True, null=True, blank=True)
     descripcion = models.CharField(max_length=50, null=True, blank=True)
-    slug_doc = models.CharField(max_length=30, default = ' ', null=True, blank=True)
+    slug_ft = models.CharField(max_length=30, default = '', null=True, blank=True)
+    slug_itm = models.CharField(max_length=30, default = '', null=True, blank=True)
+    slug_iu = models.CharField(max_length=30, default = '', null=True, blank=True)
     def __str__(self):
-        return self.codigo
+        return (str(self.codigo) + '-' + str(self.descripcion))
 
-class ITM(models.Model):
-    componente = models.ForeignKey(Componente, on_delete=models.CASCADE)
+class TipoConjunto(models.Model):
+    codigo= models.CharField(max_length=16, unique= True, null=True, blank=True)
+    descripcion = models.CharField(max_length=50, null=True, blank=True)
+    sistema = models.ForeignKey(TipoSistema, on_delete=models.CASCADE, null=True, blank=True)
+    slug_ft = models.CharField(max_length=30, default = '', null=True, blank=True)
+    slug_itm = models.CharField(max_length=30, default = '', null=True, blank=True)
+    slug_iu = models.CharField(max_length=30, default = '', null=True, blank=True)
+    def __str__(self):
+        return (str(self.sistema.codigo) + '.' + str(self.codigo) + '-' + str(self.descripcion))
+
+class TipoComponente(models.Model):
+    codigo= models.CharField(max_length=16, unique= True, null=True, blank=True)
+    descripcion = models.CharField(max_length=50, null=True, blank=True)
+    conjunto = models.ForeignKey(TipoConjunto, on_delete=models.CASCADE, null=True, blank=True)
+    slug_ft = models.CharField(max_length=30, default = '', null=True, blank=True)
+    def __str__(self):
+        return (str(self.conjunto.sistema.codigo) + '.' + str(self.conjunto.codigo) + '.' + str(self.codigo) + '-' + str(self.descripcion))
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# 4. TOPOLOGÍA DE LOS TIPOS DE VEHÍCULOS y DE EAVM
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
+class SistemasVehiculo(models.Model):
+    vehiculo = models.ForeignKey(TipoVehiculo, on_delete=models.CASCADE, null=True, blank=True)
+    sistema = models.ForeignKey(TipoSistema, on_delete=models.CASCADE, null=True, blank=True)
+
+class SistemasEAVM(models.Model):
+    EAVM = models.ForeignKey(TipoEAVM, on_delete=models.CASCADE, null=True, blank=True)
+    sistema = models.ForeignKey(TipoSistema, on_delete=models.CASCADE, null=True, blank=True)
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# 5. INSTRUCCIONES TECNICAS DE MANTENIMIENTO DE COMPONENTES
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+class InstruccionTecnica(models.Model):
+    componente = models.ForeignKey(TipoComponente, on_delete=models.CASCADE)
     codigo = models.CharField(max_length=16, unique= True)
     definicion = models.CharField(max_length=50, unique= True)
     n1 = models.BooleanField(default=True)
@@ -57,77 +133,12 @@ class ITM(models.Model):
     valor_min = models.FloatField(null=True, blank=True)
     valor_max = models.FloatField(null=True, blank=True)
     unidades_medida = models.CharField(max_length=6, null=True, blank=True)
-    slug_doc = models.CharField(max_length=30, default = ' ', null=True, blank=True)
+    slug_it = models.CharField(max_length=30, default = ' ', null=True, blank=True)
     def __str__(self):
         return self.codigo
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# 1.2 Ejes
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-class TipoEje(models.Model):
-    codigo= models.CharField(max_length=16, unique= True)
-    opciones_anchos =  [('UIC-IB', 'UIC(1435) <> IBÉRICO (1668)'),
-                        ('UIC-RUS', 'UIC(1435) <> RUSO (1520)'),
-                        ('UIC-RUS-IB', 'UIC <> RUSO <> IBÉRICO'),
-                        ('METR-UIC', 'MÉTRICO(1000) <> UIC(1435)'),
-                        ('UIC', 'UIC (1435)'),
-                        ('IB', 'IB (1668)')]
-    anchos = models.CharField(max_length=12, choices = opciones_anchos, default = 'UIC-IB')
-    diseñador = models.ForeignKey(Diseñador, on_delete=models.RESTRICT, limit_choices_to={'de_ejes': True},)
-    aprovador = models.ForeignKey(Aprovador, on_delete=models.RESTRICT)
-    fecha_aprovacion = models.DateField(null=True, blank=True)
-    certificador = models.ForeignKey(Certificador, on_delete=models.RESTRICT)
-    fecha_certificacion = models.DateField(null=True, blank=True)
-    documentacion_tecnica = models.CharField(max_length=30, default = ' ', null=True, blank=True)
-    plan_mantenimiento = models.ForeignKey(PlanMantenimiento, on_delete=models.RESTRICT, null=True, blank=True)
-    imagen = models.CharField(max_length=30,default = ' ', null=True, blank=True)
-    def __str__(self):
-        return self.codigo
-
-class TipoConjuntoEje(models.Model):
-    tipo_eje = models.ForeignKey(TipoEje, on_delete=models.CASCADE)
-    codigo= models.CharField(max_length=16, unique= True)
-    descripción = models.CharField(max_length=50, unique= True)
-    documentacion_tecnica = models.CharField(max_length=30, default = ' ', null=True, blank=True)
-    def __str__(self):
-        return (str(self.tipo_eje.codigo) + '-' + str(self.codigo))
-
-class TipoElementoEje(models.Model):
-    tipo_conjunto = models.ForeignKey(TipoConjuntoEje, on_delete=models.CASCADE)
-    codigo= models.CharField(max_length=16, unique= True)
-    descripción = models.CharField(max_length=50, unique= True)
-    documentacion_tecnica = models.CharField(max_length=30, default = ' ', null=True, blank=True)
-    def __str__(self):
-        return (str(self.tipo_conjunto.tipo_eje.codigo) + '-' + str(self.tipo_conjunto.codigo) + '-' + str(self.codigo))
-
-class ConsistenciaEje(models.Model):
-    tipo_conjunto = models.ForeignKey(TipoConjuntoEje, on_delete=models.CASCADE)
-    codigo= models.CharField(max_length=16, unique= True)
-    nivel_entrada = models.IntegerField(default = 1)
-    descripción = models.CharField(max_length=300, unique= True)
-    valor_min = models.FloatField(null=True, blank=True)
-    valor_max = models.FloatField(null=True, blank=True)
-    unidades_medida = models.CharField(max_length=6, null=True, blank=True)
-    instruccion_tecnica = models.CharField(max_length=30, default = ' ', null=True, blank=True)
-    def __str__(self):
-        return (str(self.tipo_conjunto.tipo_eje.codigo) + '-' + str(self.tipo_conjunto.codigo) + '-' + str(self.codigo))
-
-
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# Morfología de un tipo de vehículo
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-class SistemasVehiculo(models.Model):
-    vehiculo = models.ForeignKey(TipoVehiculo, on_delete=models.CASCADE, null=True, blank=True)
-    sistema = models.ForeignKey(Sistema, on_delete=models.CASCADE, null=True, blank=True)
-
-class EjesVehiculo(models.Model):
-    vehiculo = models.ForeignKey(TipoVehiculo, on_delete=models.CASCADE, null=True, blank=True)
-    eje = models.ForeignKey(TipoEje, on_delete=models.CASCADE, null=True, blank=True)
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# 1. CAMBIADORES
+# CAMBIADORES
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 class VersionCambiador(models.Model):
     codigo= models.CharField(max_length=16, unique= True)
@@ -148,7 +159,5 @@ class VersionCambiador(models.Model):
     fecha_certificacion = models.DateField(null=True, blank=True)
     def __str__(self):
         return self.codigo
-    def get_absolute_url(self):
-        return reverse("ficha_version_cambiador", kwargs={'pk':self.pk})
 
 

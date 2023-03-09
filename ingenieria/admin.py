@@ -1,21 +1,18 @@
 from django.contrib import admin
-from ingenieria.models import TipoVehiculo, SistemasVehiculo, EjesVehiculo
-from ingenieria.models import Sistema, Componente, ITM
-from ingenieria.models import TipoEje, TipoConjuntoEje, TipoElementoEje, ConsistenciaEje
+from ingenieria.models import PlanMantenimiento, NivelesPlan, InstruccionTecnica
+from ingenieria.models import TipoVehiculo, TipoEAVM, SistemasVehiculo, SistemasEAVM
+from ingenieria.models import TipoSistema, TipoConjunto, TipoComponente
 from ingenieria.models import VersionCambiador
 
 # Register your models here.
+admin.site.register(PlanMantenimiento)
+admin.site.register(NivelesPlan)
+admin.site.register(InstruccionTecnica)
 admin.site.register(TipoVehiculo)
-admin.site.register(Sistema)
-admin.site.register(Componente)
-admin.site.register(ITM)
-
-admin.site.register(TipoEje)
-admin.site.register(TipoConjuntoEje)
-admin.site.register(TipoElementoEje)
-admin.site.register(ConsistenciaEje)
-
+admin.site.register(TipoEAVM)
 admin.site.register(SistemasVehiculo)
-admin.site.register(EjesVehiculo)
-
+admin.site.register(SistemasEAVM)
+admin.site.register(TipoSistema)
+admin.site.register(TipoConjunto)
+admin.site.register(TipoComponente)
 admin.site.register(VersionCambiador)

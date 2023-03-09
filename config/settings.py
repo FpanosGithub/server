@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -36,24 +35,47 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     # Terceros
+    'rest_framework',
+    'corsheaders',
     # Propias
     'organizaciones',
     'usuarios',
     'red_ferroviaria',
     'ingenieria',
+    'material',
+    'streaming',
+    'eventos',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # whitenoise y corsheaders middleware despues de security middleware  
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# CORS HEADERS configuration
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:3000',
+    'http://localhost:8000',
+    'http://mercave-2301.azurewebsites.net',
+)
+# CSRF Configuration
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://mercave-2301.azurewebsites.net',
+]
+
 
 ROOT_URLCONF = 'config.urls'
 
@@ -148,6 +170,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = (str(BASE_DIR.joinpath('static')),)
+STATICFILES_FINDERS = [
+                        "django.contrib.staticfiles.finders.FileSystemFinder", 
+                        "django.contrib.staticfiles.finders.AppDirectoriesFinder"
+                    ]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = str(BASE_DIR.joinpath('media'))
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
