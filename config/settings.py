@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-+5n_3hs_u=*)9pb*!ne+f2308$!kk*5z!46c64f9=o$&f7s-^-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['169.254.130.3','*']
 
 # Application definition
 
@@ -68,12 +68,12 @@ MIDDLEWARE = [
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
     'http://localhost:8000',
-    'http://mercave-2301.azurewebsites.net',
+    'http://trams-server.azurewebsites.net',
 )
 # CSRF Configuration
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
-    'http://mercave-2301.azurewebsites.net',
+    'http://trams-server.azurewebsites.net',
 ]
 
 
@@ -106,32 +106,32 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # DEJAR EL CODIGO NO USADO EN COMENTARIOS!!!!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # <LOCAL>
-DATABASES = {
-   "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "USER": "fp",
-        "PASSWORD": "",
-        "NAME": "trams",
-        "HOST": "localhost",
-        "PORT": "",
-    }
-}
+#DATABASES = {
+#   "default": {
+#        "ENGINE": "django.db.backends.postgresql_psycopg2",
+#        "USER": "fp",
+#        "PASSWORD": "",
+#        "NAME": "trams",
+#        "HOST": "localhost",
+#        "PORT": "",
+#    }
+#}
 #</LOCAL>
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # <AZURE>
-#import os
-#hostname = os.environ['DBHOST']
-#DATABASES = {
-#    'default': {
-#        'NAME': os.environ['DBNAME'],
-#        'ENGINE': 'django.db.backends.postgresql',
-#        'HOST': hostname + ".postgres.database.azure.com",
-#        'USER': os.environ['DBUSER'],
-#        'PASSWORD': os.environ['DBPASS'] 
-#    }
-#}
-#ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
-#CSRF_TRUSTED_ORIGINS = ['https://'+ os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+import os
+hostname = os.environ['DBHOST']
+DATABASES = {
+    'default': {
+        'NAME': os.environ['DBNAME'],
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': hostname + ".postgres.database.azure.com",
+        'USER': os.environ['DBUSER'],
+        'PASSWORD': os.environ['DBPASS'] 
+    }
+}
+ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+CSRF_TRUSTED_ORIGINS = ['https://'+ os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else ['*']
 # </AZURE>
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Password validation
