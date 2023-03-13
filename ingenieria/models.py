@@ -12,9 +12,8 @@ class PlanMantenimiento(models.Model):
     codigo = models.CharField(max_length=16, unique= True)
     descripcion = models.CharField(max_length=300, null=True, blank=True)
     num_niveles = models.IntegerField(default=3, null=True, blank=True)
-    slug_pm = models.CharField(max_length=30, default = '', null=True, blank=True)
     def __str__(self):
-        return self.codigo
+        return ('Slug: ' + str(self.pk) + ' // Código: ' + str(self.codigo))
 
 class NivelesPlan(models.Model):
     pm = models.ForeignKey(PlanMantenimiento, on_delete=models.CASCADE, null=True, blank=True)
@@ -23,7 +22,7 @@ class NivelesPlan(models.Model):
     dias_siguiente = models.IntegerField(default=365)
     km_siguiente = models.IntegerField(default=100000)
     def __str__(self):
-        return (str(self.pm.codigo) + '-' + str(self.cod_nivel))
+        return ('Slug: ' + str(self.pk) + ' // Plan:' + str(self.pm.codigo) + '- Nivel: ' + str(self.cod_nivel))
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # 1. TIPOS DE VEHÍCULOS
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -48,10 +47,8 @@ class TipoVehiculo(models.Model):
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     imagen = models.CharField(max_length=30,default = ' ', null=True, blank=True)
     pm = models.ForeignKey(PlanMantenimiento, on_delete=models.RESTRICT, null=True, blank=True)
-    slug_ft = models.CharField(max_length=30, default = ' ', null=True, blank=True)
-    slug_iu = models.CharField(max_length=30, default = '', null=True, blank=True)
     def __str__(self):
-        return (str(self.clase) + '-' + str(self.tipo_uic) + '-' + str(self.serie_uic))
+        return ('Slug: ' + str(self.pk) + ' // Clase:' + str(self.clase) + '- tipo:' + str(self.tipo_uic) + '- Serie:' + str(self.serie_uic))
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # 2. TIPOS DE EAVM - Ejes Ancho Variable de Mercancias
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -71,10 +68,8 @@ class TipoEAVM(models.Model):
     fecha_certificacion = models.DateField(null=True, blank=True)
     imagen = models.CharField(max_length=30,default = '', null=True, blank=True)
     pm = models.ForeignKey(PlanMantenimiento, on_delete=models.RESTRICT, null=True, blank=True)
-    slug_ft = models.CharField(max_length=30, default = '', null=True, blank=True)
-    slug_iu = models.CharField(max_length=30, default = '', null=True, blank=True)
     def __str__(self):
-        return self.codigo
+        return ('Slug: ' + str(self.pk) + ' // Código: ' + str(self.codigo))
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # 3. Sistemas conjuntos y componentes en los vehículos o en los EAVM
@@ -82,29 +77,22 @@ class TipoEAVM(models.Model):
 class TipoSistema(models.Model):
     codigo= models.CharField(max_length=16, unique= True, null=True, blank=True)
     descripcion = models.CharField(max_length=50, null=True, blank=True)
-    slug_ft = models.CharField(max_length=30, default = '', null=True, blank=True)
-    slug_itm = models.CharField(max_length=30, default = '', null=True, blank=True)
-    slug_iu = models.CharField(max_length=30, default = '', null=True, blank=True)
     def __str__(self):
-        return (str(self.codigo) + '-' + str(self.descripcion))
+        return ('Slug: ' + str(self.pk) + ' // Sistema:' + str(self.codigo) + ': ' + str(self.descripcion))
 
 class TipoConjunto(models.Model):
     codigo= models.CharField(max_length=16, unique= True, null=True, blank=True)
     descripcion = models.CharField(max_length=50, null=True, blank=True)
     sistema = models.ForeignKey(TipoSistema, on_delete=models.CASCADE, null=True, blank=True)
-    slug_ft = models.CharField(max_length=30, default = '', null=True, blank=True)
-    slug_itm = models.CharField(max_length=30, default = '', null=True, blank=True)
-    slug_iu = models.CharField(max_length=30, default = '', null=True, blank=True)
     def __str__(self):
-        return (str(self.sistema.codigo) + '.' + str(self.codigo) + '-' + str(self.descripcion))
+        return ('Slug: ' + str(self.pk) + ' // Sistema:' + str(self.sistema.codigo) + '- Conjunto:' + str(self.codigo))
 
 class TipoComponente(models.Model):
     codigo= models.CharField(max_length=16, unique= True, null=True, blank=True)
     descripcion = models.CharField(max_length=50, null=True, blank=True)
     conjunto = models.ForeignKey(TipoConjunto, on_delete=models.CASCADE, null=True, blank=True)
-    slug_ft = models.CharField(max_length=30, default = '', null=True, blank=True)
     def __str__(self):
-        return (str(self.conjunto.sistema.codigo) + '.' + str(self.conjunto.codigo) + '.' + str(self.codigo) + '-' + str(self.descripcion))
+        return ('Slug: ' + str(self.pk) + ' // Sistema:' + str(self.conjunto.sistema.codigo) + '- Conjunto:' + str(self.conjunto.codigo) + 'Componente' + str(self.codigo))
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # 4. TOPOLOGÍA DE LOS TIPOS DE VEHÍCULOS y DE EAVM
@@ -133,9 +121,8 @@ class InstruccionTecnica(models.Model):
     valor_min = models.FloatField(null=True, blank=True)
     valor_max = models.FloatField(null=True, blank=True)
     unidades_medida = models.CharField(max_length=6, null=True, blank=True)
-    slug_it = models.CharField(max_length=30, default = ' ', null=True, blank=True)
     def __str__(self):
-        return self.codigo
+        return ('Slug: ' + str(self.pk) + ' // Componente: ' + str(self.componenente.codigo) + ' - IT: ' + str(self.codigo))
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # CAMBIADORES
