@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-+5n_3hs_u=*)9pb*!ne+f2308$!kk*5z!46c64f9=o$&f7s-^-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['169.254.130.3','*']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -130,7 +130,7 @@ DATABASES = {
         'PASSWORD': os.environ['DBPASS'] 
     }
 }
-ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else ['*']
 CSRF_TRUSTED_ORIGINS = ['https://'+ os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else ['*']
 # </AZURE>
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

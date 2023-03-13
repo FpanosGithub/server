@@ -11,7 +11,7 @@ class Vehiculo(models.Model):
     # Descripción del vehiculo
     tipo = models.ForeignKey(TipoVehiculo, on_delete=models.CASCADE, null=True, blank=True)
     num_uic = models.CharField(max_length=17, unique= True, default = '', null=True, blank=True)
-    descripcion_particular = models.CharField(max_length=50, default = '', null=True, blank=True)
+    descripcion_particular = models.CharField(max_length=100, default = '', null=True, blank=True)
     #!!!!!!!!
     km_origen = models.FloatField(default=0)                  # km que llevaba cuando la EEM lo asumió
     fecha_origen = models.DateField(default = "2022-01-01")   # cuando lo asumión la EEM

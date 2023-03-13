@@ -10,7 +10,7 @@ from organizaciones.models import Fabricante, Diseñador, Aprovador, Certificado
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 class PlanMantenimiento(models.Model):
     codigo = models.CharField(max_length=16, unique= True)
-    descripcion = models.CharField(max_length=300, null=True, blank=True)
+    descripcion = models.CharField(max_length=200, null=True, blank=True)
     num_niveles = models.IntegerField(default=3, null=True, blank=True)
     def __str__(self):
         return ('Slug: ' + str(self.pk) + ' // Código: ' + str(self.codigo))
@@ -35,7 +35,7 @@ class TipoVehiculo(models.Model):
     descripcion = models.CharField(max_length=50, null=True, blank=True)
     marca = models.CharField(max_length=50, null=True, blank=True)
     modelo = models.CharField(max_length=50, null=True, blank=True)
-    tipo_uic = models.CharField(max_length=4, null=True, blank=True)
+    tipo_uic = models.CharField(max_length=2, null=True, blank=True)
     serie_uic = models.CharField(max_length=4, null=True, blank=True)
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     num_bogies = models.IntegerField(default=0, null=True, blank=True)
